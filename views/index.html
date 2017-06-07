@@ -283,8 +283,39 @@ $(document).ready(function(){
 			//});
 		});
 		$('#castiguri').text(sum + " RON");
+		extractionFrequency(arrayOfLines);
 	});
 });
+
+function extractionFrequency($arrayOfLines) {
+	var frequencyMap = new Map();
+	var extractionsSinceOneOrEighty=0;
+	$.each($arrayOfLines, function(index, line) {
+		
+			var arrayOfItems=line.split('\t');
+			var i=0;
+			while(arrayOfItems[i]=="") i++;
+			var results=line.split('\t')[i+1].split(", ");
+			
+			if($.inArray("1",results)!=-1 || $.inArray("80",results)!=-1) //1 or 80 was extracted in this round
+			{
+			if(!frequencyMap.has(extractionsSinceOneOrEighty)) frequencyMap.set(extractionsSinceOneOrEighty,0);
+				frequencyMap.set(extractionsSinceOneOrEighty,frequencyMap.get(extractionsSinceOneOrEighty)+1);
+				extractionsSinceOneOrEighty=0;
+			}
+			else
+			{
+				extractionsSinceOneOrEighty++;
+			}
+			
+		});
+	var frecventa='';
+	for (var [key, value] of frequencyMap) {
+		frecventa+='dupa ' + key + ' extrageri s-a extras 1 sau 80 de '+ value + ' ori| ';
+	}
+	$('#frecventa').text(frecventa);
+}
+
 </script
 
 </head>
@@ -343,6 +374,12 @@ $(document).ready(function(){
 		<td>
 			<label for="castiguri" style="font-size: 1.5em;">Suma finala:</label>
 			<label id="castiguri" style="font-size: 1.5em;">0 RON</label
+		</td>
+	</tr>
+		<tr>
+		<td>
+			<label for="frecventa" style="font-size: 1.5em;">Frecventa</label>
+			<label id="frecventa" style="font-size: 1.5em;">nimica</label
 		</td>
 	</tr>
 </body>
