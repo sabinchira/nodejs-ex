@@ -91,6 +91,9 @@ app.get('/pagecount', function (req, res) {
   }
 });
 
+//get scripts from node_modules folder
+app.use('/scripts', express.static(__dirname + '/node_modules/'));
+
 // error handling
 app.use(function(err, req, res, next){
   console.error(err.stack);

@@ -6,7 +6,8 @@
   <title>Lotostats</title>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
+ <script type="text/javascript" src="/scripts/jquery-colorfy/jquery.colorfy.js"></script>
+    <script type="text/javascript" src="/scripts/jquery-colorfy/jquery.colorfy.markdown.js"></script>
 <style>
 
 /*!
@@ -49,14 +50,57 @@ body {
   line-height: 1.4;
 }
 
+.extrageri { 
+	width: 100%;
+	height: 100%;
+	background: white;
+	border-color: black;
+	border-width: 2px;
+	border-style: solid;
+	text-rendering: auto;
+    font: 100%/112% Verdana, Arial, Helvetica, sans-serif;
+}
+
+ .money .currency {
+       color: red;
+     }
+     .money .number {
+       color: green;
+     }
+     .markdown .title {
+       color: red;
+     }
+     .markdown .block {
+       color: green;
+     }
+     .markdown .strong {
+       color: blue;
+     }
+     .markdown .emphasis {
+       color: pink;
+     }
+     .markdown .strikethrough {
+       color: lime;
+     }
+     .markdown .inlinecode {
+       color: purple;
+     }
+     .markdown .codeblock {
+       color: #CC0066;
+     }
+     .markdown .orderedlist {
+       color: maroon;
+     }
+     .markdown .unorderedlist {
+       color: orange;
+     }
+
 html {
   font-family: sans-serif;
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
 }
-ul {
-    margin-top: 0;
-}
+
 .container {
   margin-right: auto;
   margin-left: auto;
@@ -211,12 +255,33 @@ pre {
   font-family: Menlo,Monaco,"Liberation Mono",Consolas,monospace !important;
 }
 
+ul {
+    margin-top: 0;
+}
+
+.input-color {
+    position: relative;
+}
+.input-color label {
+    padding-left: 20px;
+}
+.input-color .color-box {
+    width: 10px;
+    height: 10px;
+    display: inline-block;
+    background-color: #ccc;
+    position: absolute;
+    left: 5px;
+    top: 5px;
+}
+
 </style>
 
 <script>
 $(document).ready(function(){
 	$('button').click(function(){
 		var arrayOfLines = $('#extrageri').val().split('\n');
+		var extrageri_colorate_text='';
 		var crtExtraction=0;
 		var lastExtractionWon=0;
 		var extractionsSinceLasOneOrEighty=0;
@@ -229,6 +294,9 @@ $(document).ready(function(){
 		var bet=false;
 		var sum=0;
 		$.each(arrayOfLines, function(index, line) {
+			if (!line.replace(/\s/g, '').length)
+				return; // string only contained whitespace (ie. spaces, tabs or line breaks)
+		
 			crtExtraction++;
 			var arrayOfItems=line.split('\t');
 			var i=0;
@@ -263,13 +331,27 @@ $(document).ready(function(){
 				if(bet==true) //if we placed a bet on this extraction then add the winings to the final amount
 				{
 					sum+=initialBet*Math.pow(progression,extractionsSinceLasOneOrEighty-noOfExtractionsSinceLastOneOrEightyToWaitBeforeBetting)*odds;
+					extrageri_colorate_text+="> " + line + '\n'; //color in green extraction won
 					bet=false; //don't bet on next round, wait for noOfExtractionsSinceLastOneOrEightyToWaitBeforeBetting of consecutive extractions before betting again
+				}
+				else
+				{
+					extrageri_colorate_text+="- " + line + '\n';
 				}
 				extractionsSinceLasOneOrEighty=0;
 				console.log(date + " " + time);
 			}
 			else
-			{	
+			{
+				if(bet==true)
+				{
+					extrageri_colorate_text+="# " + line + '\n';
+				}
+				else
+				{
+					extrageri_colorate_text+=line + '\n';
+				}
+			
 				extractionsSinceLasOneOrEighty++;
 				if(extractionsSinceLasOneOrEighty==noOfExtractionsSinceLastOneOrEightyToWaitBeforeBetting)
 				{
@@ -282,9 +364,18 @@ $(document).ready(function(){
 			//	console.log(item);
 			//});
 		});
+		$('#extrageri_colorate').val(extrageri_colorate_text);
+		$("div.extrageri").remove();
+		$('#extrageri_colorate').colorfy("markdown");
+		$("div.extrageri").css({'max-height' : '', 'height' : $('#extrageri').height()});
+	
 		$('#castiguri').text(sum + " RON");
 		extractionFrequency(arrayOfLines);
 	});
+});
+
+$( window ).resize(function() {
+  	$("div.extrageri").css({'height' : '100%'});
 });
 
 function extractionFrequency($arrayOfLines) {
@@ -310,77 +401,116 @@ function extractionFrequency($arrayOfLines) {
 			
 		});
 	var frecventa='';
+	var keys = [];
+	var i=0;
+	
 	for (var [key, value] of frequencyMap) {
-		frecventa+='dupa ' + key + ' extrageri s-a extras 1 sau 80 de '+ value + ' ori| ';
+		keys.push(key);
 	}
+	
+	keys.sort();
+
+	for (i = 0; i < keys.length; i++) {
+	  var key = keys[i];
+	  frecventa+='dupa ' + key + ' extrageri s-a extras 1 sau 80 de '+ frequencyMap.get(key) + ' ori| ';
+	  }
+	
+	<!-- for (var [key, value] of frequencyMap) { -->
+		<!-- frecventa+='dupa ' + key + ' extrageri s-a extras 1 sau 80 de '+ value + ' ori| '; -->
+	<!-- } -->
 	$('#frecventa').text(frecventa);
 }
-
-</script
-
+</script>
 </head>
 <body style="height: 90%; width: 99%;">
 
   <h1>Parametri</h1>
   
-  <table style="height: 100%; width: 100%;">
-	<tr>
-		<td>
-			<label for="ture_dupa_1_8">La cate extrageri dupa ce a iesit 1 sau 8 incepi</label>
-			<input type="text" id="ture_dupa_1_8" value="3"/>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			<label for="cate_ture_dupa_1_8">Cate extrageri dupa ce a iesit 1 sau 8 pariezi</label>
-			<input type="text" id="cate_ture_dupa_1_8" value="3"/>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			<label for="cota_sau">Cota 1 sau 80</label>
-			<input type="text" id="cota_sau" value="1.90"></input>
-		</td>
-	</tr>
-  	<tr>
-		<td>
-			<label for="pariu_initial">Pariu initial</label>
-			<input type="text" id="pariu_initial" value="1"/>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			<label for="progresie">Progresie</label>
-			<input type="text" id="progresie" value="2"/>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			<h1>Copiaza aici rezultatele de la extragere</h1>
-		</td>
-	</tr>
-	<tr style="height: 100%; width: 100%;">
-		<td>
-			<textarea id="extrageri" style="height: 100%; width: 100%;">
-			</textarea>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			<button style="width: 8em; height: 2em; font-size: 1.5em;">Calculeaza</button>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			<label for="castiguri" style="font-size: 1.5em;">Suma finala:</label>
-			<label id="castiguri" style="font-size: 1.5em;">0 RON</label
-		</td>
-	</tr>
+	<table style="height: 100%; width: 100%;">
 		<tr>
-		<td>
-			<label for="frecventa" style="font-size: 1.5em;">Frecventa</label>
-			<label id="frecventa" style="font-size: 1.5em;">nimica</label
-		</td>
-	</tr>
+			<td>
+				<label for="ture_dupa_1_8">La cate extrageri dupa ce a iesit 1 sau 8 incepi</label>
+				<input type="text" id="ture_dupa_1_8" value="3"/>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="cate_ture_dupa_1_8">Cate extrageri dupa ce a iesit 1 sau 8 pariezi</label>
+				<input type="text" id="cate_ture_dupa_1_8" value="3"/>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="cota_sau">Cota 1 sau 80</label>
+				<input type="text" id="cota_sau" value="1.90"></input>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="pariu_initial">Pariu initial</label>
+				<input type="text" id="pariu_initial" value="1"/>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="progresie">Progresie</label>
+				<input type="text" id="progresie" value="2"/>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<h1>Copiaza aici rezultatele de la extragere</h1>
+			</td>
+			<td>
+				<ul>
+				<li>
+					<div class="input-color">
+						<label>extrageri castigatoare pe care s-a pariat</label>
+						<div class="color-box" style="background-color: green;"></div>
+					</div>
+				</li>
+				<li>
+					<div class="input-color">
+						<label>extrageri necasitgatoare pe care s-a pariat</label>
+						<div class="color-box" style="background-color: red;"></div>
+					</div>
+				</li>
+				<li>
+					<div class="input-color">
+						<label>extrageri castigatoare pe care nu s-a pariat</label>
+						<div class="color-box" style="background-color: yellow;"></div>
+					</div>
+				</li>				
+			</ul>
+			<td>
+		</tr>
+		<tr style="height: 100%; width: 100%;">
+			<td style="width: 50%;">
+				<textarea id="extrageri" style="height: 100%; width: 100%; border-color: black; border-width: 2px; border-style: solid;">
+				</textarea>
+			</td>
+			<td style="width: 50%;">
+				<textarea id="extrageri_colorate" class="extrageri">
+				</textarea>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<button style="width: 8em; height: 2em; font-size: 1.5em;">Calculeaza</button>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="castiguri" style="font-size: 1.5em;">Suma finala:</label>
+				<label id="castiguri" style="font-size: 1.5em;">0 RON</label>
+			</td>
+		</tr>
+			<tr>
+			<td colspan="2">
+				<label for="frecventa" style="font-size: 1.5em;">Frecventa</label>
+				<label id="frecventa" style="font-size: 1.5em;">nimica</label>
+			</td>
+		</tr>
+	</table>
 </body>
 </html>
