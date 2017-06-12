@@ -408,7 +408,7 @@ function extractionFrequency($arrayOfLines) {
 
 	for (i = 0; i < keys.length; i++) {
 	  var key = keys[i];
-	  frecventa+='dupa ' + key + ' extrageri s-a extras 1 sau 80 de '+ frequencyMap.get(key) + ' ori| ';
+	  frecventa+='la a ' + (key+1) + '-a extragere s-a extras 1 sau 80 de '+ frequencyMap.get(key) + ' ori| ';
 	  }
 	
 	<!-- for (var [key, value] of frequencyMap) { -->
@@ -503,7 +503,7 @@ function extractionFrequency($arrayOfLines) {
 		</tr>
 			<tr>
 			<td colspan="2">
-				<label for="frecventa" style="font-size: 1.5em;">Frecventa</label>
+				<label for="frecventa" style="font-size: 1.5em;">Frecventa:</label>
 				<label id="frecventa" style="font-size: 1.5em;">nimica</label>
 			</td>
 		</tr>
