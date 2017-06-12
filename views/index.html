@@ -280,7 +280,7 @@ ul {
 <script>
 $(document).ready(function(){
 	$('button').click(function(){
-		var arrayOfLines = $('#extrageri').val().split('\n');
+		var arrayOfLines = $('#extrageri').val().split('\n').reverse(); //reverse because the first extraction is the newest when copied into textarea
 		var extrageri_colorate_text='';
 		var crtExtraction=0;
 		var lastExtractionWon=0;
@@ -331,12 +331,12 @@ $(document).ready(function(){
 				if(bet==true) //if we placed a bet on this extraction then add the winings to the final amount
 				{
 					sum+=initialBet*Math.pow(progression,extractionsSinceLasOneOrEighty-noOfExtractionsSinceLastOneOrEightyToWaitBeforeBetting)*odds;
-					extrageri_colorate_text+="> " + line + '\n'; //color in green extraction won
+					extrageri_colorate_text="> " + line + '\n'+extrageri_colorate_text; //color in green extraction won
 					bet=false; //don't bet on next round, wait for noOfExtractionsSinceLastOneOrEightyToWaitBeforeBetting of consecutive extractions before betting again
 				}
 				else
 				{
-					extrageri_colorate_text+="- " + line + '\n';
+					extrageri_colorate_text="- " + line + '\n'+extrageri_colorate_text; //we didn't bet on this round but 1 or 80 was extracted so colour in yellow
 				}
 				extractionsSinceLasOneOrEighty=0;
 				console.log(date + " " + time);
@@ -345,11 +345,11 @@ $(document).ready(function(){
 			{
 				if(bet==true)
 				{
-					extrageri_colorate_text+="# " + line + '\n';
+					extrageri_colorate_text="# " + line + '\n'+extrageri_colorate_text; //we placed a bet on this round but we did not win, colour it in red
 				}
 				else
 				{
-					extrageri_colorate_text+=line + '\n';
+					extrageri_colorate_text=line + '\n'+extrageri_colorate_text; //we didn't placed a bet on this round, leave it in black
 				}
 			
 				extractionsSinceLasOneOrEighty++;
@@ -359,10 +359,6 @@ $(document).ready(function(){
 					noOfExtractionsOnWhichWeBet=0; //we start counting the number of consecutive extraction on which we bet next round
 				}
 			}
-			
-			//$.each(arrayOfItems, function(index, item) {
-			//	console.log(item);
-			//});
 		});
 		$('#extrageri_colorate').val(extrageri_colorate_text);
 		$("div.extrageri").remove();
