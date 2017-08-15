@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en" style="height: 100%; width: 100%;">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Lotostats</title>
+  
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script>
+    $(document).ready(function(){
+      $('button').click(function(){
+        //01-02-03-07-09-11-13-15-18-21-45-51-55-58-59-63-75-76-78-80......16.12.2016 10:05
+        var arrayOfLines = $('#extrageri').val().split('\n');
+        var extractions = [];
+        $.each(arrayOfLines, function(index, line) {
+          if (!line.replace(/\s/g, '').length)
+            return; // string only contained whitespace (ie. spaces, tabs or line breaks)
+          var date = line.split("......")[1].split(" ")[0].split(".");
+          var time = line.split("......")[1].split(" ")[1].split(":");
+          var date_time = new Date(date[2],date[1]-1,date[0],time[0],time[1]);
+
+          extractions.push({extraction: line.split("......")[0], datetime: date_time});
+        });
+        extractions.sort(function(e1,e2){
+          return e1.datetime - e2.datetime ;
+        });
+
+        var prev_date_time;
+        $.each(extractions, function(index, extraction) {
+          var distance_minutes;
+          if(prev_date_time)
+          {
+            distance_minutes=(extraction.datetime-prev_date_time)/60000; //minutes between two extractions in which 1 or 80 was extracted
+            if(extraction.datetime.toDateString() !== prev_date_time.toDateString())
+            {
+              //minutes between 23:55 (last extraction of the day) and 8:55 (5 mins before first extraction of the day to mimic contiuous extractions)
+              var minutes_without_extractions=(new Date(2000,0,2,8,55,0,0)-new Date(2000,0,1,23,55,0,0))/60000;
+              distance_minutes-=minutes_without_extractions;
+            }
+          }
+          else distance_minutes=5; //first extraction will have 0 pause due to the calculation on next line
+          
+          extraction.pause=(distance_minutes/5)-1; //number of extractions between two extractions in which 1 or 80 was extracted
+          prev_date_time=extraction.datetime;
+        });
+        
+        extractions.sort(function(e1,e2){
+          return e2.pause - e1.pause ;
+        });
+        
+        $.each(extractions, function(index, extraction) {
+          console.log(extraction.datetime + "-" + extraction.pause);
+        });
+        
+        $('#pauza_max').text(extractions[0].pause + ". Extragerea castigatoare care a intrerupt seria a fost in " + extractions[0].datetime);
+        
+        //looks like the site from where we get the data has duplicates wich will result in a pause of -1 so use -2 as pause initialisation
+        //to show them too in the frequency area to know there is an error
+        var frecventa='',crt_pause=-2,times=0;
+        $.each(extractions, function(index, extraction) {
+          times++;
+          if(crt_pause!==extraction.pause)
+          {
+            if(crt_pause!==-2) 
+            {
+              var duplicated_extractions=(crt_pause == -1 ? "(extrageri duplicate!)" : "");
+              frecventa+="La a " + (crt_pause+1) + "-a extragere s-a extras 1 sau 80 de " + times + " ori " + duplicated_extractions+'\n';
+            }
+            crt_pause=extraction.pause;
+            times=0;
+          }
+        });
+        
+        if(crt_pause!==-2) 
+        {
+          var duplicated_extractions=(crt_pause == -1 ? "(extrageri duplicate!)" : "");
+          frecventa+="La a " + (crt_pause+1) + "-a extragere s-a extras 1 sau 80 de " + times + " ori " + duplicated_extractions+'\n';
+        }
+        
+        $('#frecventa').text(frecventa);
+        
+      });
+    });
+  </script>
+
+</head>
+<body style="height: 90%; width: 99%;">
+  <table style="height: 100%; width: 100%;">
+		<tr>
+		  <td colspan="2">
+		    <h1>Copiaza mai jos rezultatele de la extragere</h1>
+      </td>
+    </tr>
+    <tr style="height: 100%; width: 100%;">
+			<td style="width: 50%">
+				<textarea id="extrageri" style="height: 100%; width: 100%; border-color: black; border-width: 2px; border-style: solid;">
+				</textarea>
+			</td>
+      <td style="height: 100%; width: 50%;">
+        <div style="height: 100%;margin-left: 1em; vertical-align: top;">
+          <label for="frecventa" style="font-size: 1.5em;">Frecventa:</label><br/>
+          <label id="frecventa" style="font-size: 1.5em; white-space: pre-wrap;"></label>
+        </div>
+			</td>
+		</tr>
+    <tr>
+			<td colspan="2">
+				<button style="width: 8em; height: 2em; font-size: 1.5em;">Calculeaza</button>
+			</td>
+		</tr>
+    <tr>
+			<td colspan="2">
+				<label for="pauza_max" style="font-size: 1.5em;">Numarul extragerilor consecutive in care nu a iesit 1 sau 80:</label>
+				<label id="pauza_max" style="font-size: 1.5em;"></label>
+			</td>
+		</tr>
+  </table>
+</body>
